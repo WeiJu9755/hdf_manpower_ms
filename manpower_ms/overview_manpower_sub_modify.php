@@ -68,6 +68,9 @@ function processform($aFormValues){
 	$mDB2 = "";
 	$mDB2 = new MywebDB();
 
+	$mDB3 = "";
+	$mDB3 = new MywebDB();
+
 	$Qry="UPDATE overview_manpower_sub set
 			engineering_date 	= '$engineering_date'
 			,floor 				= '$floor_list'
@@ -75,8 +78,8 @@ function processform($aFormValues){
 			,available_manpower	= '$available_manpower'
 			,manpower_gap		= '$manpower_gap'
 			,makeby				= '$memberID'
-			,last_modify		= now()
-			where auto_seq = '$auto_seq'";
+			,last_modify		=  now()
+			where auto_seq      = '$auto_seq'";
 			
 	$mDB->query($Qry);
 	
@@ -106,7 +109,13 @@ function processform($aFormValues){
 		
 		}
 	}
+	// 更新主檔
+    $Qry3="UPDATE CaseManagement 
+           SET last_modify8 = NOW(), makeby8 = '$memberID' 
+           WHERE case_id = '$case_id'";
+    $mDB3->query($Qry3);
 
+	$mDB3->remove();
 	$mDB2->remove();
 	$mDB->remove();
 
@@ -144,6 +153,8 @@ if (isset($_GET['times'])){
 	//先判斷是否已有資料，沒有資料則直接帶入實際進場日，有資料則取得上一筆的日期
 	$mDB = "";
 	$mDB = new MywebDB();
+	$mDB2 = "";
+	$mDB2 = new MywebDB();
 
 	for ($i = 1; $i <= 5; $i++) {
 
@@ -200,7 +211,14 @@ if (isset($_GET['times'])){
 
 	}
 
+	// 更新主檔
+	$Qry2="UPDATE CaseManagement 
+		   SET last_modify8 = NOW(), makeby8 = '$memberID' 
+		   WHERE case_id = '$case_id'";
+	$mDB->query($Qry2);
+
 	$mDB->remove();
+	$mDB2->remove();
 
 
 } else {

@@ -79,14 +79,19 @@ function processform($aFormValues){
 		$seq				= trim($aFormValues['seq']);
 		$seq2				= trim($aFormValues['seq2']);
 		$engineering_date	= trim($aFormValues['engineering_date']);
+		$memberID       	= $_SESSION['memberID'];
 
 		
 		//存入實體資料庫中
 		$mDB = "";
 		$mDB = new MywebDB();
+		$mDB2 = "";
+		$mDB2 = new MywebDB();
 	  
 		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,engineering_date) values ('$case_id','$seq','$seq2','$engineering_date')";
+		$Qry2 = "UPDATE CaseManagement SET last_modify8 = NOW(), makeby8 = '$memberID' WHERE case_id = '$case_id'";
 		$mDB->query($Qry);
+		$mDB2->query($Qry2);
 		//再取出auto_seq
 		$Qry="select auto_seq from overview_manpower_sub where case_id = '$case_id' and seq = '$seq' and seq2 = '$seq2' order by auto_seq desc limit 0,1";
 		$mDB->query($Qry);
