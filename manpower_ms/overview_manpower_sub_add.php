@@ -102,6 +102,7 @@ function processform($aFormValues){
 		}
 
         $mDB->remove();
+		$mDB2->remove();	
 
 		if (!empty($auto_seq)) {
 			$objResponse->script("myDraw();");
