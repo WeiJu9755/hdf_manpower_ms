@@ -56,10 +56,13 @@ function SaveValue($aFormValues){
 		$works_per_floor 		= trim($aFormValues['works_per_floor']);
 		$standard_manpower 		= trim($aFormValues['standard_manpower']);
 		$builder_id 			= trim($aFormValues['builder_id']);
+		$case_id				= trim($aFormValues['case_id']);
 
 		//存入實體資料庫中
 		$mDB = "";
 		$mDB = new MywebDB();
+		$mDB2 = "";
+		$mDB2 = new MywebDB();
 
 		$Qry="UPDATE overview_building set
 				 eng_description	= '$eng_description'
@@ -76,9 +79,17 @@ function SaveValue($aFormValues){
 				,makeby				= '$memberID'
 				,last_modify		= now()
 				where auto_seq = '$auto_seq'";
-				
+
 		$mDB->query($Qry);
+
+		// 更新主檔
+		$Qry2="UPDATE CaseManagement 
+			SET last_modify8 = NOW(), makeby8 = '$memberID' 
+			WHERE case_id = '$case_id'";
+		$mDB2->query($Qry2);
+				
         $mDB->remove();
+		$mDB2->remove();
 
 		
 	return $objResponse;
@@ -415,6 +426,7 @@ $style_css
 						<input type="hidden" name="fm" value="$fm" />
 						<input type="hidden" name="site_db" value="$site_db" />
 						<input type="hidden" name="memberID" value="$memberID" />
+						<input type="hidden" name="case_id" value="$case_id" />
 						<input type="hidden" name="auto_seq" value="$auto_seq" />
 					</div>
 				</div>
