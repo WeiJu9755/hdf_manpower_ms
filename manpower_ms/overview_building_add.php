@@ -37,14 +37,21 @@ function processform($aFormValues){
 		$seq				= trim($aFormValues['seq']);
 		$builder_id			= trim($aFormValues['builder_id']);
 		$building			= trim($aFormValues['building']);
+		$case_id			= trim($aFormValues['case_id']);
 
 		
 		//存入實體資料庫中
 		$mDB = "";
 		$mDB = new MywebDB();
+		$mDB2 = "";
+		$mDB2 = new MywebDB();
+
+		
 	  
 		$Qry="insert into overview_building (case_id,seq,builder_id,building,makeby,last_modify) values ('$case_id','$seq','$builder_id','$building','$memberID',now())";
+		$Qry2 = "UPDATE CaseManagement SET last_modify8 = NOW(), makeby8 = '$memberID' WHERE case_id = '$case_id'";
 		$mDB->query($Qry);
+		$mDB2->query($Qry2);
 		//再取出auto_seq
 		$Qry="select auto_seq from overview_building where case_id = '$case_id' and seq = '$seq' order by auto_seq desc limit 0,1";
 		$mDB->query($Qry);
