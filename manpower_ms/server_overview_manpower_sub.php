@@ -15,13 +15,13 @@
 	/* Array of database columns which should be read and sent back to DataTables. Use a space where
 	 * you want to insert a non-database field (for example a counter or static image)
 	 */
-	$aColumns = array( 'auto_seq','case_id','seq','engineering_date','floor','standard_manpower','available_manpower','manpower_gap','makeby','last_modify','seq2');
+	$aColumns = array( 'a.auto_seq','a.case_id','a.seq','a.engineering_date','a.floor','a.standard_manpower','a.available_manpower','a.manpower_gap','a.makeby','a.last_modify','a.seq2','c.actual_entry_date','a.scheduled_entry_date','a.actual_manpower','a.manpower_type');
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "auto_seq";
 	
 	/* DB table to use */
-	$sTable = "overview_manpower_sub";
+	$sTable = "overview_manpower_sub a";
 	
 //	include( $_SERVER['DOCUMENT_ROOT']."/class/products_db.php" );
 	include( "/website/class/".$site_db."_db.php" );
@@ -54,7 +54,7 @@
 	/*
 	 * Ordering
 	 */
-	$sOrder = "ORDER BY auto_seq ";
+	$sOrder = "ORDER BY a.auto_seq ";
 	/*
 	if ( isset( $_GET['iSortCol_0'] ) )
 	{
@@ -118,14 +118,15 @@
 
 	
 	if ($sWhere=="")
-		$sWhere = "WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2' ";
+		$sWhere = "WHERE a.case_id = '$case_id' AND a.seq = '$seq' AND a.seq2 = '$seq2' ";
 	else
-		$sWhere .= " and case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2' ";
+		$sWhere .= " and a.case_id = '$case_id' AND a.seq = '$seq' AND a.seq2 = '$seq2' ";
 	
 	 
 	$sQuery = "
 		SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $aColumns))."
 		FROM   $sTable
+		LEFT JOIN overview_building c ON c.auto_seq = a.seq2
 		$sWhere
 		$sOrder
 		$sLimit
@@ -142,7 +143,7 @@
 	
 	/* Total data set length */
 	$sQuery = "
-		SELECT COUNT(".$sIndexColumn.")
+		SELECT COUNT(a.$sIndexColumn)
 		FROM   $sTable
 	";
 	$rResultTotal = mysql_query( $sQuery, $gaSql['link'] ) or die(mysql_error());
@@ -173,7 +174,15 @@
 			else if ( $aColumns[$i] != ' ' )
 			{
 				/* General output */
-				$row[] = $aRow[ $aColumns[$i] ];
+				//$row[] = $aRow[ $aColumns[$i] ];
+
+				$field = $aColumns[$i];
+				$field = str_replace("a.","",$field);
+				$field = str_replace("b.","",$field);
+				$field = str_replace("c.","",$field);
+				$field = str_replace("d.","",$field);
+				
+				$row[] = $aRow[ $field ];
 
 			}
 		}

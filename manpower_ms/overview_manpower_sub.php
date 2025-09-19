@@ -59,6 +59,8 @@ function DeleteRow($auto_seq,$case_id,$memberID){
 $xajax->processRequest();
 
 
+
+
 $fm = $_GET['fm'];
 $case_id = $_GET['case_id'];
 $seq = $_GET['seq'];
@@ -121,14 +123,19 @@ $list_view=<<<EOT
 	<table class="table table-bordered border-dark w-100" id="overview_manpower_sub_table" style="min-width:1160px;">
 		<thead class="table-light border-dark">
 			<tr style="border-bottom: 1px solid #000;">
-				<th class="text-center text-nowrap" style="width:18%;padding: 10px;background-color: #CBF3FC;">進場日</th>
-				<th class="text-center text-nowrap" style="width:18%;padding: 10px;background-color: #CBF3FC;">樓層數</th>
-				<th class="text-center text-nowrap" style="width:18%;padding: 10px;background-color: #CBF3FC;">標準人力</th>
-				<th class="text-center text-nowrap" style="width:18%;padding: 10px;background-color: #CBF3FC;">可派人力</th>
-				<th class="text-center text-nowrap" style="width:18%;padding: 10px;background-color: #CBF3FC;">差額</th>
-				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">處理</th>
+				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">進場日</th>
+				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">預計進場日</th>
+				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">樓層數</th>
+
+				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">預定標準人力</th>
+				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">工班可派人力</th>
+				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">實際出工人力</th>
+
+				<th class="text-center text-nowrap" style="width:5%;padding: 10px;background-color: #CBF3FC;">差額</th>
+				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">人員差異</th>
+				<th class="text-center text-nowrap" style="width:5%;padding: 10px;background-color: #CBF3FC;">處理</th>
 			</tr>
-		</thead>
+			</thead>
 		<tbody class="table-group-divider">
 			<tr>
 				<td colspan="6" class="dataTables_empty">資料載入中...</td>
@@ -207,43 +214,108 @@ $style_css
 			"fnRowCallback": function( nRow, aData, iDisplayIndex ) { 
 
 
-				//進場日
+				// 進場日
+				var actual_entry_date = "";
 				var engineering_date = "";
-				if (aData[3] != null && aData[3] != "" && aData[3] != "0000-00-00")
-					engineering_date = aData[3];
 
-				$('td:eq(0)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+engineering_date+'</div>' );
+				if (aData[11] && aData[11] !== "0000-00-00") {
+					actual_entry_date = aData[11];
+				}
+				if (aData[3] && aData[3] !== "0000-00-00") {
+					engineering_date = aData[3];
+				}
+
+				if (engineering_date !== "") {
+					if (engineering_date === actual_entry_date) {
+						
+						$('td:eq(0)', nRow).html(
+							'<div class="d-flex justify-content-center align-items-center size12 text-center" ' +
+							'style="height:auto;min-height:32px;">' +
+							engineering_date + ' <span style="color:green;">&nbsp;(實際)</span></div>'
+						);
+					} else {
+						
+						$('td:eq(0)', nRow).html(
+							'<div class="d-flex justify-content-center align-items-center size12 text-center" ' +
+							'style="height:auto;min-height:32px;">' +
+							engineering_date + ' <span style="color:blue;">&nbsp;(預計)</span></div>'
+						);
+					}
+				} else {
+					
+					$('td:eq(0)', nRow).html(
+						'<div class="d-flex justify-content-center align-items-center size12 text-center" ' +
+						'style="height:auto;min-height:32px;">—</div>'
+					);
+				}
+
+				// 預計進場日
+				var scheduled_entry_date = "";
+				
+				if (aData[12] && aData[12] !== "0000-00-00") {
+					scheduled_entry_date = aData[12];
+				}
+			
+				$('td:eq(1)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+scheduled_entry_date+'</div>' );
+
 
 				//樓層數
 				var floor = "";
 				if (aData[4] != null && aData[4] != "0")
 					floor = aData[4];
 
-				$('td:eq(1)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+floor+'</div>' );
+				$('td:eq(2)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+floor+'</div>' );
 
 				//標準人力
 				var standard_manpower = "";
-				if (aData[5] != null && aData[5] != "0")
+				if (aData[5] != null )
 					standard_manpower = aData[5];
 
-				$('td:eq(2)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
+				$('td:eq(3)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
 
 				//可派人力
 				var available_manpower = "";
-				if (aData[6] != null && aData[6] != "0")
+				if (aData[6] != null )
 					available_manpower = aData[6];
 
-				$('td:eq(3)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+available_manpower+'</div>' );
+				$('td:eq(4)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+available_manpower+'</div>' );
 
-				//差額
-				var manpower_gap = "";
-				if (aData[7] != null && aData[7] != "0")
-					manpower_gap = aData[7];
+				//實際出工人力
+				var actual_manpower = "";
+				if (aData[13] != null && aData[13] != "0")
+					actual_manpower = aData[13];
 
-				$('td:eq(4)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 red weight text-center" style="height:auto;min-height:32px;">'+manpower_gap+'</div>' );
+				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_manpower+'</div>' );
+
+				// 差額
+					var manpower_gap = "";
+					if (aData[7] != null) {
+						manpower_gap = aData[7];
+					}
+
+					// 預設顏色 class
+					var colorClass = "red";
+
+					// 如果 manpower_gap 是 0 (數字或字串)
+					if (manpower_gap == 0) {
+						colorClass = "black";
+					}
+
+					$('td:eq(6)', nRow).html(
+						'<div class="d-flex justify-content-center align-items-center size12 ' + colorClass + ' weight text-center" style="height:auto;min-height:32px;">'
+						+ manpower_gap +
+						'</div>'
+);
+
+				//人員差異
+				var manpower_type = "";
+				if (aData[14] != null && aData[14] != "0")
+					manpower_type = aData[14];
+
+				$('td:eq(7)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 weight text-center" style="height:auto;min-height:32px;">'+manpower_type+'</div>' );
 
 				//處理
-				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,400,'');";
+				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,500,'');";
 				var mdel = "myDel(" + aData[0] + ", '$case_id', '$memberID');";
 
 				var show_btn = '';
@@ -266,7 +338,7 @@ $style_css
 					+'</div>';
 
 
-				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+show_btn+'</div>' );
+				$('td:eq(8)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+show_btn+'</div>' );
 
 
 
