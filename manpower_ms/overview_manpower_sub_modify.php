@@ -67,7 +67,6 @@ function processform($aFormValues){
 	$memberID				= trim($aFormValues['memberID']);
 	$auto_seq				= trim($aFormValues['auto_seq']);
 	$engineering_date		= trim($aFormValues['engineering_date']);
-	$scheduled_entry_date_per_floor	= trim($aFormValues['scheduled_entry_date_per_floor']);
 	$floor_list				= trim($aFormValues['floor_list']);
 	$standard_manpower		= trim($aFormValues['standard_manpower']);
 	$available_manpower		= trim($aFormValues['available_manpower']);
@@ -81,9 +80,8 @@ function processform($aFormValues){
 );
 
 	//取得原來未修改前的進廠日期
-	$overview_manpower_sub_row = getkeyvalue2("eshop_info","overview_manpower_sub","auto_seq = '$auto_seq'","engineering_date,case_id,seq,scheduled_entry_date");
+	$overview_manpower_sub_row = getkeyvalue2("eshop_info","overview_manpower_sub","auto_seq = '$auto_seq'","engineering_date,case_id,seq");
 	$org_engineering_date = $overview_manpower_sub_row['engineering_date'];
-	$org_scheduled_entry_date_per_floor = $overview_manpower_sub_row['scheduled_entry_date'];
 	$case_id = $overview_manpower_sub_row['case_id'];
 	$seq = $overview_manpower_sub_row['seq'];
 
@@ -100,7 +98,6 @@ function processform($aFormValues){
 	$Qry="UPDATE overview_manpower_sub set
 			engineering_date 		= '$engineering_date'
 			,floor 					= '$floor_list'
-			,scheduled_entry_date 	= '$scheduled_entry_date_per_floor'
 			,standard_manpower		= '$standard_manpower'
 			,available_manpower		= '$available_manpower'
 			,actual_manpower		= '$actual_manpower'
@@ -130,31 +127,6 @@ function processform($aFormValues){
 					$auto_seq2 = $row['auto_seq'];
 					$Qry2="UPDATE overview_manpower_sub set
 							engineering_date = engineering_date + INTERVAL ".$diff." DAY
-							,last_modify		= now()
-							where auto_seq = '$auto_seq2'";
-					$mDB2->query($Qry2);
-				}
-			}
-		
-		}
-	}
-	if ((!isset($org_scheduled_entry_date_per_floor)) || ($org_scheduled_entry_date_per_floor <> "0000-00-00")) {
-		//檢查是否有日期差
-		if ($scheduled_entry_date_per_floor == $org_scheduled_entry_date_per_floor) {
-			//沒有差異則不做任何處理
-		} else {
-			//更新
-			$diff = dateDiffDays($org_scheduled_entry_date_per_floor, $scheduled_entry_date_per_floor, true);
-
-			$Qry="SELECT * FROM overview_manpower_sub
-			WHERE case_id = '$case_id' AND seq = '$seq' AND auto_seq > '$auto_seq'
-			ORDER BY auto_seq";
-			$mDB->query($Qry);
-			if ($mDB->rowCount() > 0) {
-				while ($row=$mDB->fetchRow(2)) {
-					$auto_seq2 = $row['auto_seq'];
-					$Qry2="UPDATE overview_manpower_sub set
-							scheduled_entry_date = scheduled_entry_date + INTERVAL ".$diff." DAY
 							,last_modify		= now()
 							where auto_seq = '$auto_seq2'";
 					$mDB2->query($Qry2);
@@ -196,8 +168,7 @@ if (isset($_GET['times'])){
 	$seq = $_GET['seq'];
 	$seq2 = $_GET['seq2'];
 
-	$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","scheduled_entry_date,actual_entry_date,construction_days_per_floor,standard_manpower");
-	$scheduled_entry_date = $overview_building_row['scheduled_entry_date'];
+	$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","actual_entry_date,construction_days_per_floor,standard_manpower");
 	$actual_entry_date = $overview_building_row['actual_entry_date'];
 	$construction_days_per_floor = $overview_building_row['construction_days_per_floor'];
 	$standard_manpower = $overview_building_row['standard_manpower'];
@@ -211,11 +182,10 @@ if (isset($_GET['times'])){
 	$mDB2 = new MywebDB();
 
 $last_engineering_date = null;
-$last_scheduled_entry_date = null;
 $last_floor = null;
 
 // 先嘗試撈最後一筆
-$Qry="SELECT engineering_date, scheduled_entry_date, floor 
+$Qry="SELECT engineering_date, floor 
       FROM overview_manpower_sub
       WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2'
       ORDER BY auto_seq DESC LIMIT 1";
@@ -224,12 +194,11 @@ $mDB->query($Qry);
 if ($mDB->rowCount() > 0) {
     $row=$mDB->fetchRow(2);
     $last_engineering_date = $row['engineering_date'];
-    $last_scheduled_entry_date = $row['scheduled_entry_date'];
     $last_floor = $row['floor'];
 } else {
     // 沒有資料，從頭開始
-    $last_engineering_date = isValidDate($actual_entry_date) ? $actual_entry_date : (isValidDate($scheduled_entry_date) ? $scheduled_entry_date : date("Y-m-d"));
-    $last_scheduled_entry_date = $last_engineering_date;
+    $last_engineering_date = isValidDate($actual_entry_date) ? $actual_entry_date  : date("Y-m-d");
+
     $last_floor = "0F"; // 從 0F 開始，等下會 +1
 }
 
@@ -241,18 +210,16 @@ for ($i = 1; $i <= 5; $i++) {
 
     // 累加日期
     $default_day  = date("Y-m-d", strtotime($last_engineering_date . " +{$construction_days_per_floor} days"));
-    $default_day2 = date("Y-m-d", strtotime($last_scheduled_entry_date . " +{$construction_days_per_floor} days"));
 
     // 寫入 DB
     $Qry="INSERT INTO overview_manpower_sub 
-          (case_id, seq, seq2, engineering_date, scheduled_entry_date, floor, standard_manpower, actual_manpower, manpower_type, manpower_gap) 
+          (case_id, seq, seq2, engineering_date, floor, standard_manpower, actual_manpower, manpower_type, manpower_gap) 
           VALUES 
           ('$case_id','$seq','$seq2','$default_day','$default_day2','$next_floor','$standard_manpower','$actual_manpower','$manpower_type','$manpower_gap')";
     $mDB->query($Qry);
 
     // 更新基準
     $last_engineering_date = $default_day;
-    $last_scheduled_entry_date = $default_day2;
     $last_floor = $next_floor;
 
     if ($i == 1) {
@@ -326,7 +293,6 @@ if ($total > 0) {
 	$seq = $row['seq'];
 	$seq2 = $row['seq2'];
 	$engineering_date = $row['engineering_date'];
-	$scheduled_entry_date_per_floor	= $row['scheduled_entry_date'];
 	$floor = $row['floor'];
 	$standard_manpower = $row['standard_manpower'];
 	$available_manpower = $row['available_manpower'];
@@ -480,27 +446,6 @@ $style_css
 									<script type="text/javascript">
 										$(function () {
 											$('#engineering_date').datetimepicker({
-												locale: 'zh-tw'
-												,format:"YYYY-MM-DD"
-												,allowInputToggle: true
-											});
-										});
-									</script>
-								</div> 
-							</div> 
-							<div class="col-lg-12 col-sm-12 col-md-12">
-								<div class="field_div1">預計進場日:</div>
-								<div class="field_div2">
-									<!--
-									<div style="padding:8px 0;font-size:18px;color:blue;text-align:left;font-weight:700;">$scheduled_entry_date_per_floor</div>
-									-->
-									<div class="input-group" id="scheduled_entry_date_per_floor" style="width:100%;max-width:250px;">
-										<input type="text" class="form-control" name="scheduled_entry_date_per_floor" placeholder="請選擇進場日期" aria-describedby="scheduled_entry_date_per_floor" value="$scheduled_entry_date_per_floor">
-										<button class="btn btn-outline-secondary input-group-append input-group-addon" type="button" data-target="#scheduled_entry_date_per_floor" data-toggle="datetimepicker"><i class="bi bi-calendar"></i></button>
-									</div>
-									<script type="text/javascript">
-										$(function () {
-											$('#scheduled_entry_date_per_floor').datetimepicker({
 												locale: 'zh-tw'
 												,format:"YYYY-MM-DD"
 												,allowInputToggle: true

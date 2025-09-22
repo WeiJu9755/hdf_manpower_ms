@@ -250,13 +250,8 @@ $style_css
 				}
 
 				// 預計進場日
-				var scheduled_entry_date = "";
-				
-				if (aData[12] && aData[12] !== "0000-00-00") {
-					scheduled_entry_date = aData[12];
-				}
 			
-				$('td:eq(1)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+scheduled_entry_date+'</div>' );
+				$('td:eq(1)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_entry_date+'</div>' );
 
 
 				//樓層數
@@ -282,8 +277,8 @@ $style_css
 
 				//實際出工人力
 				var actual_manpower = "";
-				if (aData[13] != null && aData[13] != "0")
-					actual_manpower = aData[13];
+				if (aData[12] != null && aData[12] != "0")
+					actual_manpower = aData[12];
 
 				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_manpower+'</div>' );
 
@@ -309,13 +304,13 @@ $style_css
 
 				//人員差異
 				var manpower_type = "";
-				if (aData[14] != null && aData[14] != "0")
-					manpower_type = aData[14];
+				if (aData[13] != null && aData[13] != "0")
+					manpower_type = aData[13];
 
 				$('td:eq(7)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 weight text-center" style="height:auto;min-height:32px;">'+manpower_type+'</div>' );
 
 				//處理
-				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,500,'');";
+				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,420,'');";
 				var mdel = "myDel(" + aData[0] + ", '$case_id', '$memberID');";
 
 				var show_btn = '';
