@@ -96,6 +96,7 @@ $list_view=<<<EOT
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:7%;">實際<br>完工日</th>
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:7%;">預訂<br>進場日</th>
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:7%;">實際<br>進場日</th>
+							<th scope="col" class="text-center text-nowrap vmiddle" style="width:5%;">首層<br>施工天數</th>
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:5%;">每層<br>施工天數</th>
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:5%;">每層<br>工程量(M2)</th>
 							<th scope="col" class="text-center text-nowrap vmiddle" style="width:5%;">標準<br>人力需求</th>
@@ -219,34 +220,41 @@ $list_view
 					actual_entry_date = aData[5];
 
 				$('td:eq(7)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_entry_date+'</div>' );
+
+				//首層施工天數
+				var construction_days_first_floor = "";
+				if (aData[16] != null && aData[16] != "0")
+					construction_days_first_floor = aData[16];
+
+				$('td:eq(8)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+construction_days_first_floor+'</div>' );
 				
 				//每層施工天數
 				var construction_days_per_floor = "";
 				if (aData[6] != null && aData[6] != "0")
 					construction_days_per_floor = aData[6];
 
-				$('td:eq(8)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+construction_days_per_floor+'</div>' );
+				$('td:eq(9)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+construction_days_per_floor+'</div>' );
 
 				//每層工程量(M2)
 				var works_per_floor = "";
 				if (aData[7] != null && aData[7] != "0")
 					works_per_floor = number_format(aData[7]);
 
-				$('td:eq(9)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+works_per_floor+'</div>' );
+				$('td:eq(10)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+works_per_floor+'</div>' );
 				
 				//標準人力需求
 				var standard_manpower = "";
 				if (aData[8] != null && aData[8] != "0")
 					standard_manpower = aData[8];
 
-				$('td:eq(10)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
+				$('td:eq(11)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
 				
 				//代工單位
 				var subcontractor_name = "";
 				if (aData[10] != null && aData[10] != "")
 					subcontractor_name = aData[10];
 
-				$('td:eq(11)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+subcontractor_name+'</div>' );
+				$('td:eq(12)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+subcontractor_name+'</div>' );
 
 				//編輯
 				var url1 = "openfancybox_edit('/index.php?ch=overview_building_modify&auto_seq="+aData[11]+"&case_id="+aData[12]+"&fm=$fm',1200,600,'');";
@@ -258,7 +266,7 @@ $list_view
 						+'<button type="button" class="btn btn-light" onclick="'+mdel+'" title="刪除"><i class="bi bi-trash"></i></button>'
 						+'</div>';
 				
-				$('td:eq(12)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;">'+show_btn+'</div>' );
+				$('td:eq(13)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;">'+show_btn+'</div>' );
 
 				//工程人力
 				var url2 = "openfancybox_edit('/index.php?ch=overview_manpower_sub&case_id="+aData[12]+"&seq="+aData[13]+"&seq2="+aData[11]+"&fm=$fm',1200,'96%','');";
@@ -268,7 +276,7 @@ $list_view
 						+'<button type="button" class="btn btn-light" onclick="'+url2+'" title="工程人力"><i class="bi bi-person-arms-up"></i>&nbsp;工程人力</button>'
 						+'</div>';
 
-				$('td:eq(13)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;">'+show_btn2+'</div>' );
+				$('td:eq(14)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;">'+show_btn2+'</div>' );
 				
 
 				return nRow;
