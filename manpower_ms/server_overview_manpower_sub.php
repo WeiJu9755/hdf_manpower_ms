@@ -15,7 +15,7 @@
 	/* Array of database columns which should be read and sent back to DataTables. Use a space where
 	 * you want to insert a non-database field (for example a counter or static image)
 	 */
-	$aColumns = array( 'a.auto_seq','a.case_id','a.seq','a.engineering_date','a.floor','a.standard_manpower','a.available_manpower','a.manpower_gap','a.makeby','a.last_modify','a.seq2','c.actual_entry_date','a.actual_manpower','a.manpower_type');
+	$aColumns = array( 'a.auto_seq','a.case_id','a.seq','a.engineering_date','a.floor','a.standard_manpower','a.available_manpower','a.manpower_gap','a.makeby','a.last_modify','a.seq2','c.actual_entry_date','a.actual_manpower','a.manpower_type','c.scheduled_entry_date','c.construction_days_per_floor','c.construction_days_first_floor');
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "auto_seq";
