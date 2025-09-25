@@ -15,7 +15,7 @@
 	 * you want to insert a non-database field (for example a counter or static image)
 	 */
 	$aColumns = array( 'a.layout','a.layout_number','a.scheduled_completion_date','a.actual_completion_date','a.scheduled_entry_date','a.actual_entry_date','a.construction_days_per_floor','a.works_per_floor','a.standard_manpower','a.builder_id','b.subcontractor_name'
-		,'a.auto_seq','a.case_id','a.seq','a.building','a.eng_description');
+		,'a.auto_seq','a.case_id','a.seq','a.building','a.eng_description','construction_days_first_floor');
 	
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "auto_seq";

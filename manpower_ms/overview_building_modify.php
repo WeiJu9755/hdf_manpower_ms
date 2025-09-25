@@ -52,6 +52,7 @@ function SaveValue($aFormValues){
 		$actual_completion_date = trim($aFormValues['actual_completion_date']);
 		$scheduled_entry_date 	= trim($aFormValues['scheduled_entry_date']);
 		$actual_entry_date 		= trim($aFormValues['actual_entry_date']);
+		$construction_days_first_floor = trim($aFormValues['construction_days_first_floor']);
 		$construction_days_per_floor = trim($aFormValues['construction_days_per_floor']);
 		$works_per_floor 		= trim($aFormValues['works_per_floor']);
 		$standard_manpower 		= trim($aFormValues['standard_manpower']);
@@ -72,6 +73,7 @@ function SaveValue($aFormValues){
 				,actual_completion_date = '$actual_completion_date'
 				,scheduled_entry_date = '$scheduled_entry_date'
 				,actual_entry_date 	= '$actual_entry_date'
+				,construction_days_first_floor = '$construction_days_first_floor'
 				,construction_days_per_floor = '$construction_days_per_floor'
 				,works_per_floor	= '$works_per_floor'
 				,standard_manpower	= '$standard_manpower'
@@ -127,6 +129,7 @@ if ($total > 0) {
 	$actual_completion_date = $row['actual_completion_date'];
 	$scheduled_entry_date = $row['scheduled_entry_date'];
 	$actual_entry_date = $row['actual_entry_date'];
+	$construction_days_first_floor = $row['construction_days_first_floor'];
 	$construction_days_per_floor = $row['construction_days_per_floor'];
 	$works_per_floor = $row['works_per_floor'];
 	$standard_manpower = $row['standard_manpower'];
@@ -389,6 +392,14 @@ $style_css
 						</div>
 					</div>
 					<div class="container-fluid">
+						<div class="row">
+							<div class="col-lg-6 col-sm-12 col-md-12">
+								<div class="field_div1">首層施工天數:</div> 
+								<div class="field_div2">
+									<input type="text" class="inputtext maxwidth" id="construction_days_first_floor" name="construction_days_first_floor" size="50"  maxlength="50" value="$construction_days_first_floor" onchange="setEdit();"/>
+								</div> 
+							</div> 
+						</div>
 						<div class="row">
 							<div class="col-lg-6 col-sm-12 col-md-12">
 								<div class="field_div1">每層施工天數:</div> 

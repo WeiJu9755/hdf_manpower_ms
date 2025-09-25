@@ -106,7 +106,7 @@ $show_modify_btn=<<<EOT
 <div class="inline ms-5">
 	<div class="btn-group" role="group" style="margin-top:-2px;">
 		<button type="button" class="btn btn-danger px-4 text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&times=5&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,400,'');"><i class="bi bi-plus-circle"></i>&nbsp;乙次新增5個樓層</button>
-		<button type="button" class="btn btn-danger text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_add&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,400,'');"><i class="bi bi-plus-circle"></i>&nbsp;新增資料</button>
+		<button type="button" class="btn btn-danger text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_add&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,300,'');"><i class="bi bi-plus-circle"></i>&nbsp;新增資料</button>
 		<button type="button" class="btn btn-success text-nowrap" onclick="overview_manpower_sub_Draw();"><i class="bi bi-arrow-repeat"></i>&nbsp;重整</button>
 	</div>
 </div>
@@ -187,6 +187,7 @@ $style_css
 
 <script type="text/javascript" charset="utf-8">
 	var oTable;
+	var baseScheduledDate = null;
 	$(document).ready(function() {
 		$('#overview_manpower_sub_table').dataTable( {
 			"processing": true,
@@ -249,9 +250,54 @@ $style_css
 					);
 				}
 
-				// 預計進場日
-			
-				$('td:eq(1)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_entry_date+'</div>' );
+					// 預計進場日 (只抓第一筆作基準)
+					
+					if (baseScheduledDate === null && aData[14] && aData[14] !== "0000-00-00") {
+						baseScheduledDate = aData[14];
+					}
+
+					var construction_days_first_floor = 0;
+					if (aData[16] && aData[16] !== "0") {
+						construction_days_first_floor = parseInt(aData[16], 10);
+					}
+
+					var construction_days_per_floor = 0;
+					if (aData[15] && aData[15] !== "0") {
+						construction_days_per_floor = parseInt(aData[15], 10);
+					}
+
+					// 計算新的日期：根據 row index 決定要加的天數
+					var scheduled_entry_date_tooltip = "";
+					if (baseScheduledDate) {
+						var n = iDisplayIndex; // 0-based row index (第一筆為 0)
+						var offsetDays = 0;
+
+						if (n === 0) {
+							// 第一筆：基準日，不加天數
+							offsetDays = 0;
+						} else if (n === 1) {
+							// 第二筆：從基準日加首層施工天數
+							offsetDays = construction_days_first_floor || 0;
+						} else {
+							// 第三筆以後：首層 + (n-1) * 每層施工天數
+							offsetDays = (construction_days_first_floor || 0) + (n - 1) * (construction_days_per_floor || 0);
+						}
+
+						var baseDate = new Date(baseScheduledDate);
+						baseDate.setDate(baseDate.getDate() + offsetDays);
+
+						// 格式化 yyyy-mm-dd
+						var yyyy = baseDate.getFullYear();
+						var mm = ("0" + (baseDate.getMonth() + 1)).slice(-2);
+						var dd = ("0" + baseDate.getDate()).slice(-2);
+						scheduled_entry_date_tooltip = yyyy + "-" + mm + "-" + dd;
+					}
+
+					$('td:eq(1)', nRow).html(
+						'<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">' +
+						scheduled_entry_date_tooltip +
+						'</div>'
+					);
 
 
 				//樓層數
