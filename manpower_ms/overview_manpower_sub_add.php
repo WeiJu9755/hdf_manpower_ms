@@ -134,40 +134,58 @@ $actual_entry_date = $overview_sub_row['actual_entry_date'];
 
 $standard_manpower = $overview_sub_row['standard_manpower'];
 */
-$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","actual_entry_date,construction_days_per_floor,standard_manpower");
+$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","actual_entry_date,construction_days_per_floor,construction_days_first_floor,standard_manpower");
 $actual_entry_date = $overview_building_row['actual_entry_date'];
 $construction_days_per_floor = $overview_building_row['construction_days_per_floor'];
 $standard_manpower = $overview_building_row['standard_manpower'];
+$construction_days_first_floor = $overview_building_row['construction_days_first_floor'];
 
 //先判斷是否已有資料，沒有資料則直接帶入實際進場日，有資料則取得上一筆的日期
 $mDB = "";
 $mDB = new MywebDB();
 
-$Qry="SELECT engineering_date
-FROM overview_manpower_sub
-WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2'
-ORDER BY auto_seq DESC
-LIMIT 1";
-$mDB->query($Qry);
-if ($mDB->rowCount() > 0) {
-    //已找到符合資料
-	$row=$mDB->fetchRow(2);
-	$engineering_date = $row['engineering_date'];
+// 查總共有幾筆
+$QryCount = "SELECT COUNT(*) as cnt
+				FROM overview_manpower_sub
+				WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2'
+";
+$mDB->query($QryCount);
+$rowCount = $mDB->fetchRow(2);
+$recordCount = (int)$rowCount['cnt'];
 
-	if (isValidDate($engineering_date)) {
-		$default_day = date("Y-m-d", strtotime($engineering_date."+".$construction_days_per_floor." days"));
-	} else {
-		$default_day = date("Y-m-d", strtotime("+".$construction_days_per_floor." days"));
-	}
+// 查最後一筆日期
+$QryLast = "SELECT engineering_date
+				FROM overview_manpower_sub
+				WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2'
+				ORDER BY auto_seq DESC
+				LIMIT 1
+";
+$mDB->query($QryLast);
+$lastDateRow = $mDB->fetchRow(2);
+$engineering_date = $lastDateRow ? $lastDateRow['engineering_date'] : null;
 
+// 決定 default_day
+if ($recordCount == 0) {
+    // 第一筆 → 實際進場日或今天
+    if (isValidDate($actual_entry_date)) {
+        $default_day = $actual_entry_date;
+    } else {
+        $default_day = date("Y-m-d");
+    }
+} elseif ($recordCount == 1) {
+    // 第二筆 → 第一筆日期 + construction_days_first_floor
+    if (isValidDate($engineering_date)) {
+        $default_day = date("Y-m-d", strtotime($engineering_date . " +{$construction_days_first_floor} days"));
+    } else {
+        $default_day = date("Y-m-d", strtotime("+{$construction_days_first_floor} days"));
+    }
 } else {
-
-	if (isValidDate($actual_entry_date)) {
-		$default_day = $actual_entry_date;
-	} else {
-			$default_day = date("Y-m-d");
-	}
-
+    // 第三筆以後 → 前一筆日期 + construction_days_per_floor
+    if (isValidDate($engineering_date)) {
+        $default_day = date("Y-m-d", strtotime($engineering_date . " +{$construction_days_per_floor} days"));
+    } else {
+        $default_day = date("Y-m-d", strtotime("+{$construction_days_per_floor} days"));
+    }
 }
 
 

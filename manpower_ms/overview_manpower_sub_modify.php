@@ -68,16 +68,16 @@ function processform($aFormValues){
 	$auto_seq				= trim($aFormValues['auto_seq']);
 	$engineering_date		= trim($aFormValues['engineering_date']);
 	$floor_list				= trim($aFormValues['floor_list']);
-	$standard_manpower		= trim($aFormValues['standard_manpower']);
-	$available_manpower		= trim($aFormValues['available_manpower']);
-	$actual_manpower		= trim($aFormValues['actual_manpower']);
+	$standard_manpower   = (int) $aFormValues['standard_manpower'];
+	$available_manpower  = (int) $aFormValues['available_manpower'];
+	$actual_manpower     = (int) $aFormValues['actual_manpower'];
 	$manpower_type			= trim($aFormValues['manpower_type']);
 	
-		$manpower_gap = max(0, 
-    ($actual_manpower !== "" && $actual_manpower !== 0)
-        ? $standard_manpower - $actual_manpower
-        : $standard_manpower - $available_manpower
-);
+			$manpower_gap = max(0, 
+		($actual_manpower > 0)
+			? $standard_manpower - $actual_manpower
+			: $standard_manpower - $available_manpower
+		);
 
 	//取得原來未修改前的進廠日期
 	$overview_manpower_sub_row = getkeyvalue2("eshop_info","overview_manpower_sub","auto_seq = '$auto_seq'","engineering_date,case_id,seq");
@@ -94,6 +94,9 @@ function processform($aFormValues){
 
 	$mDB3 = "";
 	$mDB3 = new MywebDB();
+
+	$mDB4 = "";
+	$mDB4 = new MywebDB();
 
 	$Qry="UPDATE overview_manpower_sub set
 			engineering_date 		= '$engineering_date'
@@ -135,6 +138,22 @@ function processform($aFormValues){
 		
 		}
 	}
+
+	if (isset($_GET['times'])){
+		for ($i = 1; $i < 5; $i++) {
+			 $target_seq = $auto_seq + $i;
+			$Qry4="UPDATE overview_manpower_sub set
+			standard_manpower		= '$standard_manpower'
+			,available_manpower		= '$available_manpower'
+			,actual_manpower		= '$actual_manpower'
+			,manpower_gap			= '$manpower_gap'
+			,manpower_type			= '$manpower_type'
+			,makeby					= '$memberID'
+			,last_modify			=  now()
+			where auto_seq      	= '$target_seq'";
+			$mDB4->query($Qry4);
+			}
+		}
 	// 更新主檔
     $Qry3="UPDATE CaseManagement 
            SET last_modify8 = NOW(), makeby8 = '$memberID' 
@@ -168,7 +187,8 @@ if (isset($_GET['times'])){
 	$seq = $_GET['seq'];
 	$seq2 = $_GET['seq2'];
 
-	$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","actual_entry_date,construction_days_per_floor,standard_manpower");
+	$overview_building_row = getkeyvalue2($site_db."_info","overview_building","auto_seq = '$seq2' and case_id = '$case_id' and seq = '$seq'","scheduled_entry_date,actual_entry_date,construction_days_per_floor,standard_manpower");
+	$scheduled_entry_date = $overview_building_row['scheduled_entry_date'];
 	$actual_entry_date = $overview_building_row['actual_entry_date'];
 	$construction_days_per_floor = $overview_building_row['construction_days_per_floor'];
 	$standard_manpower = $overview_building_row['standard_manpower'];
@@ -181,59 +201,61 @@ if (isset($_GET['times'])){
 	$mDB2 = "";
 	$mDB2 = new MywebDB();
 
-$last_engineering_date = null;
-$last_floor = null;
+	for ($i = 1; $i <= 5; $i++) {
 
-// 先嘗試撈最後一筆
-$Qry="SELECT engineering_date, floor 
-      FROM overview_manpower_sub
-      WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2'
-      ORDER BY auto_seq DESC LIMIT 1";
-$mDB->query($Qry);
+		$Qry="SELECT engineering_date,floor,actual_manpower FROM overview_manpower_sub
+		WHERE case_id = '$case_id' and seq = '$seq' and seq2 = '$seq2'
+		ORDER BY case_id,seq,engineering_date DESC LIMIT 1";
+		$mDB->query($Qry);
+		if ($mDB->rowCount() > 0) {
+			//已找到符合資料
+			$row=$mDB->fetchRow(2);
+			$engineering_date = $row['engineering_date'];
+			$floor = $row['floor'];
+			$actual_manpower = $row['actual_manpower'];
 
-if ($mDB->rowCount() > 0) {
-    $row=$mDB->fetchRow(2);
-    $last_engineering_date = $row['engineering_date'];
-    $last_floor = $row['floor'];
-} else {
-    // 沒有資料，從頭開始
-    $last_engineering_date = isValidDate($actual_entry_date) ? $actual_entry_date  : date("Y-m-d");
+			preg_match('/\d+/', $floor, $matches);
+			$number = (int)$matches[0]+1;
 
-    $last_floor = "0F"; // 從 0F 開始，等下會 +1
-}
+			$next_floor = $number."F";
 
-for ($i = 1; $i <= 5; $i++) {
-    // 處理樓層
-    preg_match('/\d+/', $last_floor, $matches);
-    $number = isset($matches[0]) ? (int)$matches[0] + 1 : 1;
-    $next_floor = $number . "F";
+			if (isValidDate($engineering_date)) {
+				$default_day = date("Y-m-d", strtotime($engineering_date."+".$construction_days_per_floor." days"));
+			} else {
+				$default_day = date("Y-m-d", strtotime("+".$construction_days_per_floor." days"));
+			}
 
-    // 累加日期
-    $default_day  = date("Y-m-d", strtotime($last_engineering_date . " +{$construction_days_per_floor} days"));
+		} else {
 
-    // 寫入 DB
-    $Qry="INSERT INTO overview_manpower_sub 
-          (case_id, seq, seq2, engineering_date, floor, standard_manpower, actual_manpower, manpower_type, manpower_gap) 
-          VALUES 
-          ('$case_id','$seq','$seq2','$default_day','$default_day2','$next_floor','$standard_manpower','$actual_manpower','$manpower_type','$manpower_gap')";
-    $mDB->query($Qry);
+			$next_floor = "1F";
 
-    // 更新基準
-    $last_engineering_date = $default_day;
-    $last_floor = $next_floor;
+			if (isValidDate($actual_entry_date)) {
+				$default_day = $actual_entry_date;
+			} else {
+				if (isValidDate($scheduled_entry_date)) {
+					$default_day = $scheduled_entry_date;
+				} else {
+					$default_day = date("Y-m-d");
+				}
+			}
 
-    if ($i == 1) {
-        $Qry="SELECT auto_seq 
-              FROM overview_manpower_sub 
-              WHERE case_id = '$case_id' AND seq = '$seq' AND seq2 = '$seq2' 
-              ORDER BY auto_seq DESC LIMIT 1";
-        $mDB->query($Qry);
-        if ($mDB->rowCount() > 0) {
-            $row=$mDB->fetchRow(2);
-            $auto_seq = $row['auto_seq'];
-        }
-    }
-}
+		}
+
+		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,engineering_date,floor,standard_manpower,actual_manpower,manpower_gap) values ('$case_id','$seq','$seq2','$default_day','$next_floor','$standard_manpower','$actual_manpower','$manpower_gap')";
+		$mDB->query($Qry);
+
+		if ($i == 1) {
+			//再取出auto_seq
+			$Qry="select auto_seq from overview_manpower_sub where case_id = '$case_id' and seq = '$seq' and seq2 = '$seq2' order by auto_seq desc limit 0,1";
+			$mDB->query($Qry);
+			if ($mDB->rowCount() > 0) {
+				//已找到符合資料
+				$row=$mDB->fetchRow(2);
+				$auto_seq = $row['auto_seq'];
+			}
+		}
+
+	}
 
 	// 更新主檔
 	$Qry2="UPDATE CaseManagement 

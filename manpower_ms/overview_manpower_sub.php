@@ -105,8 +105,8 @@ EOT;
 $show_modify_btn=<<<EOT
 <div class="inline ms-5">
 	<div class="btn-group" role="group" style="margin-top:-2px;">
-		<button type="button" class="btn btn-danger px-4 text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&times=5&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,400,'');"><i class="bi bi-plus-circle"></i>&nbsp;乙次新增5個樓層</button>
-		<button type="button" class="btn btn-danger text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_add&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,300,'');"><i class="bi bi-plus-circle"></i>&nbsp;新增資料</button>
+		<button type="button" class="btn btn-danger px-4 text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&times=5&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,420,'');"><i class="bi bi-plus-circle"></i>&nbsp;乙次新增5個樓層</button>
+		<button type="button" class="btn btn-danger text-nowrap" onclick="openfancybox_edit('/index.php?ch=overview_manpower_sub_add&case_id=$case_id&seq=$seq&seq2=$seq2&fm=$fm',800,400,'');"><i class="bi bi-plus-circle"></i>&nbsp;新增資料</button>
 		<button type="button" class="btn btn-success text-nowrap" onclick="overview_manpower_sub_Draw();"><i class="bi bi-arrow-repeat"></i>&nbsp;重整</button>
 	</div>
 </div>
