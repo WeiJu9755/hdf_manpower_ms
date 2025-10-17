@@ -67,6 +67,7 @@ function processform($aFormValues){
 	$memberID				= trim($aFormValues['memberID']);
 	$auto_seq				= trim($aFormValues['auto_seq']);
 	$engineering_date		= trim($aFormValues['engineering_date']);
+	$date_status 			= isset($aFormValues['date_status']) ? 'Y' : 'N';
 	$floor_list				= trim($aFormValues['floor_list']);
 	$standard_manpower   = (int) $aFormValues['standard_manpower'];
 	$available_manpower  = (int) $aFormValues['available_manpower'];
@@ -106,6 +107,7 @@ function processform($aFormValues){
 			,actual_manpower		= '$actual_manpower'
 			,manpower_gap			= '$manpower_gap'
 			,manpower_type			= '$manpower_type'
+			,date_status            = '$date_status'
 			,makeby					= '$memberID'
 			,last_modify			=  now()
 			where auto_seq      	= '$auto_seq'";
@@ -148,6 +150,7 @@ function processform($aFormValues){
 			,actual_manpower		= '$actual_manpower'
 			,manpower_gap			= '$manpower_gap'
 			,manpower_type			= '$manpower_type'
+			,date_status            = '$date_status'
 			,makeby					= '$memberID'
 			,last_modify			=  now()
 			where auto_seq      	= '$target_seq'";
@@ -304,8 +307,10 @@ foreach ($manpower_type_options as $ch_caption) {
     $select_manpower_type .= "<option value=\"$ch_caption\" " . mySelect($ch_caption, $manpower_type) . ">$ch_caption</option>";
 }
 
-$Qry="SELECT * FROM overview_manpower_sub
-WHERE auto_seq = '$auto_seq'";
+$Qry="SELECT a.*,b.actual_entry_date FROM overview_manpower_sub a
+LEFT JOIN overview_building b ON b.seq = a.seq and b.auto_seq = a.seq2
+where a.auto_seq = '$auto_seq' 
+";
 $mDB->query($Qry);
 $total = $mDB->rowCount();
 if ($total > 0) {
@@ -321,16 +326,36 @@ if ($total > 0) {
 	$actual_manpower = $row['actual_manpower'];
 	$manpower_type = $row['manpower_type'];
 	$manpower_gap = $row['manpower_gap'];
+	$date_status = ($row['date_status'] == 'Y') ? 'checked' : 'N';
+
+
+	$actual_entry_date = $row['actual_entry_date'];
 
 	$floor_list = explode(',', $floor);
 }
 
 $series_floor_list = json_encode($floor_list);
 
+// 進場日判斷(如果是進場日第一天，就不用顯示選項)
+
+$show_checkbox = "";
+if ($engineering_date == $actual_entry_date) {
+	$show_checkbox = "";
+} else {
+	$show_checkbox = <<<EOT
+	<div class="form-check m-0">
+		<input class="form-check-input" type="checkbox" name="date_status" id="date_status" value="Y" $date_status>
+		<label class="form-check-label" for="date_status">實際</label>
+	</div>
+EOT;
+}
+
 
 $select_list = array();
 
 $Qry="select * from items where pro_id = 'floor' order by orderby";
+
+
 $mDB->query($Qry);
 if ($mDB->rowCount() > 0) {
     //已找到符合資料
@@ -458,24 +483,31 @@ $style_css
 							<div class="col-lg-12 col-sm-12 col-md-12">
 								<div class="field_div1">進場日:</div>
 								<div class="field_div2">
-									<!--
-									<div style="padding:8px 0;font-size:18px;color:blue;text-align:left;font-weight:700;">$engineering_date</div>
-									-->
-									<div class="input-group" id="engineering_date" style="width:100%;max-width:250px;">
-										<input type="text" class="form-control" name="engineering_date" placeholder="請選擇進場日期" aria-describedby="engineering_date" value="$engineering_date">
-										<button class="btn btn-outline-secondary input-group-append input-group-addon" type="button" data-target="#engineering_date" data-toggle="datetimepicker"><i class="bi bi-calendar"></i></button>
-									</div>
-									<script type="text/javascript">
-										$(function () {
-											$('#engineering_date').datetimepicker({
-												locale: 'zh-tw'
-												,format:"YYYY-MM-DD"
-												,allowInputToggle: true
+
+									<div class="d-flex align-items-center" style="gap: 10px;">
+										
+
+										<div class="input-group" id="engineering_date" style="width:100%;max-width:250px;">
+											<input type="text" class="form-control" name="engineering_date" placeholder="請選擇進場日期" aria-describedby="engineering_date" value="$engineering_date">
+											<button class="btn btn-outline-secondary input-group-append input-group-addon" type="button" data-target="#engineering_date" data-toggle="datetimepicker">
+												<i class="bi bi-calendar"></i>
+											</button>
+										</div>
+										<script type="text/javascript">
+											$(function () {
+												$('#engineering_date').datetimepicker({
+													locale: 'zh-tw',
+													format: "YYYY-MM-DD",
+													allowInputToggle: true
+												});
 											});
-										});
-									</script>
-								</div> 
-							</div> 
+										</script>
+
+										$show_checkbox
+									</div>
+
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="container-fluid">

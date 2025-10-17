@@ -218,6 +218,7 @@ $style_css
 				// 進場日
 				var actual_entry_date = "";
 				var engineering_date = "";
+				var date_status = "";
 
 				if (aData[11] && aData[11] !== "0000-00-00") {
 					actual_entry_date = aData[11];
@@ -226,8 +227,10 @@ $style_css
 					engineering_date = aData[3];
 				}
 
+				date_status = aData[17]; 
+
 				if (engineering_date !== "") {
-					if (engineering_date === actual_entry_date) {
+					if (engineering_date === actual_entry_date || date_status === "Y") {
 						
 						$('td:eq(0)', nRow).html(
 							'<div class="d-flex justify-content-center align-items-center size12 text-center" ' +
