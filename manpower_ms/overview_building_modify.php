@@ -45,6 +45,7 @@ function SaveValue($aFormValues){
 		$site_db				= trim($aFormValues['site_db']);
 		$memberID				= trim($aFormValues['memberID']);
 		$auto_seq				= trim($aFormValues['auto_seq']);
+		$building               = trim($aFormValues['building']);
 		$eng_description 		= trim($aFormValues['eng_description']);
 		$layout 				= trim($aFormValues['layout']);
 		$layout_number 			= trim($aFormValues['layout_number']);
@@ -69,6 +70,7 @@ function SaveValue($aFormValues){
 				 eng_description	= '$eng_description'
 				,layout				= '$layout'
 				,layout_number		= '$layout_number'
+				,building           = '$building'
 				,scheduled_completion_date = '$scheduled_completion_date'
 				,actual_completion_date = '$actual_completion_date'
 				,scheduled_entry_date = '$scheduled_entry_date'
@@ -160,6 +162,18 @@ if ($mDB->rowCount() > 0) {
 		$ch_layout_name = $row['subcontractor_name'];
 		$select_layout .= "<option value=\"$ch_layout\" ".mySelect($ch_layout,$layout).">$ch_layout $ch_layout_name</option>";
 	}
+}
+
+//載入棟別
+$Qry="select caption from items where pro_id = 'building' order by pro_id,orderby";
+$mDB->query($Qry);
+$select_building = "<option></option>";
+
+if ($mDB->rowCount() > 0) {
+    while ($row=$mDB->fetchRow(2)) {
+        $ch_caption = $row['caption'];
+        $select_building .= "<option value=\"$ch_caption\" ".mySelect($ch_caption, $building).">$ch_caption</option>";
+    }
 }
 
 $mDB->remove();
@@ -277,9 +291,14 @@ $style_css
 						<div class="row">
 							<div class="col-lg-12 col-sm-12 col-md-12">
 								<div class="field_div1">棟別:</div> 
-								<div class="inline mt-2" style="width:100%;max-width:900px;">
-									<div class="inline size14 weight blue02 mt-2">$building</div>
-								</div> 
+								<div class="inline mt-2">
+									<select id="building" name="building" placeholder="請選擇" style="width:100%;max-width:150px;">
+										$select_building
+									</select>
+								</div>  
+								<!--<div class="inline mt-2" style="width:100%;max-width:900px;">
+									<div class="inline size14 weight blue02 mt-2">$building</div>-->
+								
 							</div> 
 						</div>
 					</div>
