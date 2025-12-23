@@ -24,6 +24,136 @@ if (!($detect->isMobile() && !$detect->isTablet())) {
 @include_once '/website/xajax/xajax_core/xajax.inc.php';
 $xajax = new xajax();
 
+$xajax->registerFunction("returnValue");
+function returnValue($auto_seq, $case_id, $engineering_date, $building, $floor, $construction_days_per_floor,$server_actual_manpower,$available_manpower,$standard_manpower){
+    $objResponse = new xajaxResponse();
+
+    $start_date = $engineering_date;
+   
+
+    $total_manpower = 0;
+	$use_manpower = 0 ;
+
+    $mDB = new MywebDB();
+
+    $Qry = "SELECT SUM(b.manpower) AS total_manpower
+				   ,COUNT(DISTINCT a.dispatch_date) AS total_days
+				FROM dispatch a
+				LEFT JOIN dispatch_construction b ON b.dispatch_id = a.dispatch_id
+				LEFT JOIN construction c ON c.construction_id = b.construction_id
+				WHERE  c.case_id = '$case_id' 
+								AND a.dispatch_date >='$start_date'
+								AND b.building = '$building'
+								AND b.floor = '$floor'
+								AND a.ConfirmSending = 'Y'
+    ";
+
+    $mDB->query($Qry);
+    $row = $mDB->fetchRow(2);
+    $total_manpower = $row['total_manpower'];
+	$total_days = $row['total_days'];
+
+	// 實際人力: 派工人數/施工天數
+	// 決定使用的人力：優先用資料庫的 total_manpower，否則用 server 回傳的人力 * 天數
+		// 預設為 0
+		$actual_manpower = 0;
+
+		// 決定要用的人力
+		if (!empty($total_manpower)) {
+			$use_manpower = $total_manpower;
+		} else {
+			$use_manpower = $server_actual_manpower * $construction_days_per_floor;
+		}
+
+		// 優先用資料庫天數來除
+		if ($total_days > 0) {
+			$actual_manpower = ceil($use_manpower / $total_days);
+
+		// 沒有資料庫天數，就用樓層施工天數
+		} elseif ($construction_days_per_floor > 0) {
+			$actual_manpower = ceil($use_manpower / $construction_days_per_floor);
+		}
+
+	// 差額:預定標準人力減工班可派人力，當實際出工人力有值，則變成預定標準人力減實際出工人力
+	if ($actual_manpower != 0) {
+		$manpower_gap = $standard_manpower - $actual_manpower;
+		} else {
+			$manpower_gap = $standard_manpower - $available_manpower;
+		}
+
+		// 如果結果小於 0，強制為 0
+		if ($manpower_gap < 0) {
+			$manpower_gap = 0;
+		}
+		// 設定顏色樣式
+		if ($manpower_gap > 0) {
+			// 有缺額 → 紅字粗體
+			$gap_style = "<span style='color:red;font-weight:bold;'>{$manpower_gap}</span>";
+		} else {
+			// 無缺額 → 黑字粗體
+			$gap_style = "<span style='color:black;font-weight:bold;'>{$manpower_gap}</span>";
+		}
+	
+
+    $mDB->remove();
+
+       $objResponse->assign("actual_manpower".$auto_seq,"innerHTML",$actual_manpower);
+	   $objResponse->assign("manpower_gap".$auto_seq, "innerHTML", $gap_style);
+    return $objResponse;
+}
+
+// function returnValue($auto_seq, $case_id, $engineering_date, $building, $floor, $construction_days_per_floor,$server_actual_manpower,$available_manpower,$standard_manpower){
+//     $objResponse = new xajaxResponse();
+
+//     $actual_manpower = "";
+// 	  $start_date = $engineering_date;
+	 
+// 	$Qry = "SELECT SUM(b.manpower) AS total_manpower
+// 				,COUNT(DISTINCT a.dispatch_date) AS total_days
+// 				FROM dispatch a
+// 				LEFT JOIN dispatch_construction b ON b.dispatch_id = a.dispatch_id
+// 				LEFT JOIN construction c ON c.construction_id = b.construction_id
+// 				WHERE c.case_id = '$case_id' 
+// 				AND a.dispatch_date >='$start_date'
+// 				AND b.building = '$building'
+//  				AND b.floor = '$floor'
+//     ";
+
+// 	$actual_manpower .=<<<EOT
+// 			<div>$Qry</div>
+// 			<div>$auto_seq</div>
+// 			<div>$auto_seq</div>
+// 			<div>$case_id</div>
+// 			<div>$engineering_date</div>
+// 			<div>$building</div>
+// 			<div>$floor</div>
+// 			<div>$construction_days_per_floor</div>
+// 			<div>$server_actual_manpower</div>
+// 			<div>$available_manpower</div>
+// 			<div>$standard_manpower</div>
+// 			<div>$start_date</div>
+
+
+// EOT;
+	
+
+
+
+//        $objResponse->assign("actual_manpower".$auto_seq,"innerHTML",$actual_manpower);
+
+//     return $objResponse;
+// }
+
+
+
+
+//    $objResponse->assign("actual_manpower".$auto_seq,"innerHTML",$actual_manpower);
+//     return $objResponse;
+// }
+
+
+
+
 
 $xajax->registerFunction("DeleteRow");
 function DeleteRow($auto_seq,$case_id,$memberID){
@@ -325,17 +455,14 @@ $style_css
 				$('td:eq(4)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+available_manpower+'</div>' );
 
 				//實際出工人力
-				var actual_manpower = "";
-				if (aData[12] != null && aData[12] != "0")
-					actual_manpower = aData[12];
+				var actual_manpower = '<div id="actual_manpower'+aData[0]+'"></div>';
+				
+				xajax_returnValue(aData[0],aData[1],engineering_date,aData[18],floor,construction_days_per_floor,aData[12],aData[6],aData[5]);
 
 				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_manpower+'</div>' );
 
 				// 差額
-					var manpower_gap = "";
-					if (aData[7] != null) {
-						manpower_gap = aData[7];
-					}
+				var manpower_gap = '<div id="manpower_gap'+aData[0]+'"></div>';
 
 					// 預設顏色 class
 					var colorClass = "red";
