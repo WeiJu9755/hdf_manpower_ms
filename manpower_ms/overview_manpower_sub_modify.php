@@ -159,7 +159,7 @@ function processform($aFormValues){
 		}
 	// 更新主檔
     $Qry3="UPDATE CaseManagement 
-           SET last_modify8 = NOW(), makeby8 = '$memberID' 
+           SET last_modify8 = NOW(), makeby8 = '$memberID' , update_count8 = update_count8 + 1
            WHERE case_id = '$case_id'";
     $mDB3->query($Qry3);
 
@@ -262,7 +262,7 @@ if (isset($_GET['times'])){
 
 	// 更新主檔
 	$Qry2="UPDATE CaseManagement 
-		   SET last_modify8 = NOW(), makeby8 = '$memberID' 
+		   SET last_modify8 = NOW(), makeby8 = '$memberID' , update_count8 = update_count8 + 1
 		   WHERE case_id = '$case_id'";
 	$mDB->query($Qry2);
 

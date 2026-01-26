@@ -575,17 +575,39 @@ $list_view
 
 
 				//最後修改
-				var last_modify = "";
-				if (aData[9] != null && aData[9] != "")
-					last_modify = '<div class="text-nowrap">'+moment(aData[9]).format('YYYY-MM-DD HH:mm')+'</div>';
+				var last_modify = (aData[9] != null && aData[9] != "") 
+					? '<div class="text-nowrap">' + moment(aData[9]).format('YYYY-MM-DD HH:mm') + '</div>' 
+					: "";
 				
 				//編輯人員
-				var member_name = "";
-				if (aData[17] != null && aData[17] != "")
-					member_name = '<div class="text-nowrap">'+aData[17]+'</div>';
+				var member_name = (aData[17] != null && aData[17] != "") 
+					? '<span class="text-nowrap">' + aData[17] + '</span>' 
+					: "";
+				
+				var update_count_val = (aData[23] != null && aData[23] != "") ? aData[23] : "0";
 
-				$('td:eq(6)', nRow).html( '<div class="text-center" style="height:auto;min-height:32px;">'+last_modify+member_name+'</div>' );
+				if ((last_modify == null || last_modify == "") && (member_name == null || member_name == "")) {
+				
+				$('td:eq(6)', nRow).html('<div style="height:auto;min-height:32px;"></div>');
 
+				} else {
+
+				//累計修改次數
+				var update_count_html = ' <span class="badge rounded-1 bg-secondary opacity-75" ' +
+										'style="cursor:help; font-size:10px; padding: 2px 4px; margin-left: 4px;" ' +
+										'data-bs-toggle="tooltip" ' + 
+										'data-bs-html="true" ' + // 允許 tooltip 內含 HTML
+										'title="累計修改次數：' + update_count_val + '次">' + 
+										update_count_val + '</span>';
+
+				$('td:eq(6)', nRow).html( 
+					'<div class="text-center" style="height:auto;min-height:32px;">' + 
+						last_modify + 
+						'<div>' + member_name + update_count_html + '</div>' + 
+					'</div>' 
+				);
+
+					}
 
 				return nRow;
 			

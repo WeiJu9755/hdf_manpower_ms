@@ -35,6 +35,7 @@ function processform($aFormValues){
 			`site_status` = '$site_status'
 			,last_modify8 = now()
 			,makeby8	= '$memberID'
+			,update_count8 = update_count8 + 1
 			where auto_seq = '$auto_seq'";
 	$mDB->query($Qry);
 	

@@ -34,7 +34,7 @@
 
 	$aColumns = array( 'a.status1','a.status2','a.region','a.case_id','a.construction_id','a.builder_id','a.contractor_id','a.contact','a.makeby8','a.last_modify8','a.zipcode'
 		,'a.county','a.town','a.address','a.auto_seq','c.builder_name','d.contractor_name','f.member_name','a.case_type','a.owner_builder','a.owner_contractor'
-		,'a.location_URL','a.site_status');
+		,'a.location_URL','a.site_status','a.update_count8');
 			
 	/* Indexed column (used for fast and accurate table cardinality) */
 	$sIndexColumn = "auto_seq";

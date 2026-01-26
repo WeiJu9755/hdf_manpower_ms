@@ -88,7 +88,7 @@ function SaveValue($aFormValues){
 
 		// 更新主檔
 		$Qry2="UPDATE CaseManagement 
-			SET last_modify8 = NOW(), makeby8 = '$memberID' 
+			SET last_modify8 = NOW(), makeby8 = '$memberID' , update_count8 = update_count8 + 1
 			WHERE case_id = '$case_id'";
 		$mDB2->query($Qry2);
 				
