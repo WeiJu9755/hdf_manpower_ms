@@ -307,7 +307,7 @@ foreach ($manpower_type_options as $ch_caption) {
     $select_manpower_type .= "<option value=\"$ch_caption\" " . mySelect($ch_caption, $manpower_type) . ">$ch_caption</option>";
 }
 
-$Qry="SELECT a.*,b.actual_entry_date FROM overview_manpower_sub a
+$Qry="SELECT a.*,b.actual_entry_date,b.building,b.construction_days_per_floor FROM overview_manpower_sub a
 LEFT JOIN overview_building b ON b.seq = a.seq and b.auto_seq = a.seq2
 where a.auto_seq = '$auto_seq' 
 ";
@@ -321,9 +321,11 @@ if ($total > 0) {
 	$seq2 = $row['seq2'];
 	$engineering_date = $row['engineering_date'];
 	$floor = $row['floor'];
+	$building = $row['building'];
 	$standard_manpower = $row['standard_manpower'];
 	$available_manpower = $row['available_manpower'];
-	$actual_manpower = $row['actual_manpower'];
+	$construction_days_per_floor = $row['construction_days_per_floor'];
+	// $actual_manpower = $row['actual_manpower'];
 	$manpower_type = $row['manpower_type'];
 	$manpower_gap = $row['manpower_gap'];
 	$date_status = ($row['date_status'] == 'Y') ? 'checked' : 'N';
@@ -332,6 +334,36 @@ if ($total > 0) {
 	$actual_entry_date = $row['actual_entry_date'];
 
 	$floor_list = explode(',', $floor);
+
+	$Qry = "SELECT SUM(b.manpower) AS total_manpower
+				   ,COUNT(DISTINCT a.dispatch_date) AS total_days
+				FROM dispatch a
+				LEFT JOIN dispatch_construction b ON b.dispatch_id = a.dispatch_id
+				LEFT JOIN construction c ON c.construction_id = b.construction_id
+				WHERE  c.case_id = '$case_id' 
+								AND a.dispatch_date >='$engineering_date'
+								AND b.building = '$building'
+								AND b.floor = '$floor'
+								AND a.ConfirmSending = 'Y'
+    ";
+	$mDB->query($Qry);
+	$row2 = $mDB->fetchRow(2);
+	$total_manpower = $row2['total_manpower'];
+	$total_days = $row2['total_days'];
+	$actual_manpower = 0;
+
+		// 決定要用的人力
+
+			$use_manpower = $total_manpower;
+
+		// 優先用資料庫天數來除
+		if ($total_days > 0) {
+			$actual_manpower = ceil($use_manpower / $total_days);
+
+		// 沒有資料庫天數，就用樓層施工天數
+		} elseif ($construction_days_per_floor > 0) {
+			$actual_manpower = ceil($use_manpower / $construction_days_per_floor);
+		}
 }
 
 $series_floor_list = json_encode($floor_list);
@@ -367,6 +399,7 @@ if ($mDB->rowCount() > 0) {
 	}
 
 }
+
 
 $mDB->remove();
 
@@ -545,7 +578,13 @@ $style_css
 							<div class="col-lg-12 col-sm-12 col-md-12">
 								<div class="field_div1">實際出工人力:</div> 
 								<div class="field_div2">
-									<input type="text" class="form-control" id="actual_manpower" name="actual_manpower" size="50" style="width:100%;max-width:200px;" value="$actual_manpower" onchange="setEdit();"/>
+									<input type="text"
+										class="form-control"
+										id="actual_manpower"
+										name="actual_manpower"
+										style="max-width:200px;"
+										value="$actual_manpower"
+										disabled />
 								</div> 
 							</div> 
 						</div>

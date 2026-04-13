@@ -59,11 +59,8 @@ function returnValue($auto_seq, $case_id, $engineering_date, $building, $floor, 
 		$actual_manpower = 0;
 
 		// 決定要用的人力
-		if (!empty($total_manpower)) {
+
 			$use_manpower = $total_manpower;
-		} else {
-			$use_manpower = $server_actual_manpower * $construction_days_per_floor;
-		}
 
 		// 優先用資料庫天數來除
 		if ($total_days > 0) {
