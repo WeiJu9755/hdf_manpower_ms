@@ -46,9 +46,20 @@ function processform($aFormValues){
 		$mDB2 = "";
 		$mDB2 = new MywebDB();
 
-		
+		$mDB3 = "";
+		$mDB3 = new MywebDB();
+
+		$Qry3 = "SELECT case_id,estimated_arrival_date,completion_date FROM CaseManagement WHERE case_id = '$case_id'";
+		$mDB3->query($Qry3);
+		if ($mDB3->rowCount() > 0) {
+			//已找到符合資料
+			$row=$mDB3->fetchRow(2);
+			$estimated_arrival_date = $row['estimated_arrival_date'];
+			$completion_date = $row['completion_date'];
+		}
 	  
-		$Qry="insert into overview_building (case_id,seq,builder_id,building,makeby,last_modify) values ('$case_id','$seq','$builder_id','$building','$memberID',now())";
+		$Qry="insert into overview_building (case_id,seq,builder_id,scheduled_entry_date,scheduled_completion_date,construction_days_first_floor,construction_days_per_floor,building,makeby,last_modify) 
+				values ('$case_id','$seq','$builder_id','$estimated_arrival_date','$completion_date','30','18','$building','$memberID',now())";
 		$Qry2 = "UPDATE CaseManagement SET last_modify8 = NOW(), makeby8 = '$memberID',update_count8 = update_count8+1 WHERE case_id = '$case_id'";
 		$mDB->query($Qry);
 		$mDB2->query($Qry2);
