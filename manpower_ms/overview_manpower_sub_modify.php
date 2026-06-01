@@ -66,9 +66,11 @@ function processform($aFormValues){
 	
 	$memberID				= trim($aFormValues['memberID']);
 	$auto_seq				= trim($aFormValues['auto_seq']);
+	$building				= trim($aFormValues['building']);
 	$engineering_date		= trim($aFormValues['engineering_date']);
 	$date_status 			= isset($aFormValues['date_status']) ? 'Y' : 'N';
 	$floor_list				= trim($aFormValues['floor_list']);
+	$actual_works_per_floor   = (int) $aFormValues['actual_works_per_floor'];
 	$standard_manpower   = (int) $aFormValues['standard_manpower'];
 	$available_manpower  = (int) $aFormValues['available_manpower'];
 	$actual_manpower     = (int) $aFormValues['actual_manpower'];
@@ -101,7 +103,9 @@ function processform($aFormValues){
 
 	$Qry="UPDATE overview_manpower_sub set
 			engineering_date 		= '$engineering_date'
+			,building 				= '$building'
 			,floor 					= '$floor_list'
+			,actual_works_per_floor	= '$actual_works_per_floor'
 			,standard_manpower		= '$standard_manpower'
 			,available_manpower		= '$available_manpower'
 			,actual_manpower		= '$actual_manpower'
@@ -145,6 +149,7 @@ function processform($aFormValues){
 		for ($i = 1; $i < 5; $i++) {
 			 $target_seq = $auto_seq + $i;
 			$Qry4="UPDATE overview_manpower_sub set
+			actual_works_per_floor  = '$actual_works_per_floor'
 			standard_manpower		= '$standard_manpower'
 			,available_manpower		= '$available_manpower'
 			,actual_manpower		= '$actual_manpower'
@@ -187,6 +192,7 @@ if (isset($_GET['times'])){
 
 	$times = $_GET['times'];
 	$case_id = $_GET['case_id'];
+	$building = $_GET['building'];
 	$seq = $_GET['seq'];
 	$seq2 = $_GET['seq2'];
 
@@ -244,7 +250,7 @@ if (isset($_GET['times'])){
 
 		}
 
-		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,engineering_date,floor,standard_manpower,actual_manpower,manpower_gap) values ('$case_id','$seq','$seq2','$default_day','$next_floor','$standard_manpower','$actual_manpower','$manpower_gap')";
+		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,engineering_date,building,floor,standard_manpower,actual_manpower,manpower_gap) values ('$case_id','$seq','$seq2','$default_day','$building','$next_floor','$standard_manpower','$actual_manpower','$manpower_gap')";
 		$mDB->query($Qry);
 
 		if ($i == 1) {
@@ -272,6 +278,7 @@ if (isset($_GET['times'])){
 
 } else {
 	$auto_seq = $_GET['auto_seq'];
+	$building = $_GET['building'];
 }
 
 $mDB = "";
@@ -321,6 +328,7 @@ if ($total > 0) {
 	$seq2 = $row['seq2'];
 	$engineering_date = $row['engineering_date'];
 	$floor = $row['floor'];
+	$actual_works_per_floor = $row['actual_works_per_floor'];
 	$building = $row['building'];
 	$standard_manpower = $row['standard_manpower'];
 	$available_manpower = $row['available_manpower'];
@@ -556,6 +564,16 @@ $style_css
 					<div class="container-fluid">
 						<div class="row">
 							<div class="col-lg-12 col-sm-12 col-md-12">
+								<div class="field_div1">實際工程量(M2):</div> 
+								<div class="field_div2">
+									<input type="text" class="form-control" id="actual_works_per_floor" name="actual_works_per_floor" size="50" style="width:100%;max-width:200px;" value="$actual_works_per_floor" onchange="setEdit();"/>
+								</div> 
+							</div> 
+						</div>
+					</div>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-lg-12 col-sm-12 col-md-12">
 								<div class="field_div1">預定標準人力:</div> 
 								<div class="field_div2">
 									<input type="text" class="form-control" id="standard_manpower" name="standard_manpower" size="50" style="width:100%;max-width:200px;" value="$standard_manpower" onchange="setEdit();"/>
@@ -606,6 +624,7 @@ $style_css
 						<input type="hidden" name="site_db" value="$site_db" />
 						<input type="hidden" name="memberID" value="$memberID" />
 						<input type="hidden" name="auto_seq" value="$auto_seq" />
+						<input type="hidden" name="building" value="$building" />
 						<input type="hidden" id="floor_list" name="floor_list" value="$floor_list" />
 					</div>
 				</div>

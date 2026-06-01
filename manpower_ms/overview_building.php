@@ -269,7 +269,7 @@ $list_view
 				$('td:eq(13)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;">'+show_btn+'</div>' );
 
 				//工程人力
-				var url2 = "openfancybox_edit('/index.php?ch=overview_manpower_sub&case_id="+aData[12]+"&seq="+aData[13]+"&seq2="+aData[11]+"&fm=$fm',1200,'96%','');";
+				var url2 = "openfancybox_edit('/index.php?ch=overview_manpower_sub&case_id="+aData[12]+"&building="+aData[14]+"&seq="+aData[13]+"&seq2="+aData[11]+"&fm=$fm',1200,'96%','');";
 
 				var show_btn2 = '';
 					show_btn2 = '<div class="btn-group text-nowrap">'

@@ -78,6 +78,7 @@ function processform($aFormValues){
 		$case_id			= trim($aFormValues['case_id']);
 		$seq				= trim($aFormValues['seq']);
 		$seq2				= trim($aFormValues['seq2']);
+		$building			= trim($aFormValues['building']);
 		$engineering_date	= trim($aFormValues['engineering_date']);
 		$memberID       	= $_SESSION['memberID'];
 
@@ -88,7 +89,7 @@ function processform($aFormValues){
 		$mDB2 = "";
 		$mDB2 = new MywebDB();
 	  
-		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,engineering_date) values ('$case_id','$seq','$seq2','$engineering_date')";
+		$Qry="insert into overview_manpower_sub (case_id,seq,seq2,building,engineering_date) values ('$case_id','$seq','$seq2','$building','$engineering_date')";
 		$Qry2 = "UPDATE CaseManagement SET last_modify8 = NOW(), makeby8 = '$memberID' ,update_count8 = update_count8 + 1 WHERE case_id = '$case_id'";
 		$mDB->query($Qry);
 		$mDB2->query($Qry2);
@@ -123,6 +124,7 @@ $xajax->processRequest();
 
 $fm = $_GET['fm'];
 $case_id = $_GET['case_id'];
+$building = $_GET['building'];
 $seq = $_GET['seq'];
 $seq2 = $_GET['seq2'];
 
@@ -311,6 +313,7 @@ $style_css
 					<input type="hidden" name="site_db" value="$site_db" />
 					<input type="hidden" name="member_no" value="$memberID" />
 					<input type="hidden" name="case_id" value="$case_id" />
+					<input type="hidden" name="building" value="$building" />
 					<input type="hidden" name="seq" value="$seq" />
 					<input type="hidden" name="seq2" value="$seq2" />
 					<button class="btn btn-primary" type="button" onclick="CheckValue(this.form);" style="padding: 10px;margin-right: 10px;"><i class="bi bi-check-lg green"></i>&nbsp;確定新增</button>
