@@ -483,7 +483,7 @@ $style_css
 				$('td:eq(7)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 weight text-center" style="height:auto;min-height:32px;">'+manpower_type+'</div>' );
 
 				//處理
-				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,420,'');";
+				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,520,'');";
 				var mdel = "myDel(" + aData[0] + ", '$case_id', '$memberID');";
 
 				var show_btn = '';
