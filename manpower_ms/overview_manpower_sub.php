@@ -253,7 +253,7 @@ $list_view=<<<EOT
 				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">進場日</th>
 				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">預計進場日</th>
 				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">樓層數</th>
-
+				<th class="text-center text-nowrap" style="width:15%;padding: 10px;background-color: #CBF3FC;">實際工程量(M2)</th>
 				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">預定標準人力</th>
 				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">工班可派人力</th>
 				<th class="text-center text-nowrap" style="width:10%;padding: 10px;background-color: #CBF3FC;">實際出工人力</th>
@@ -437,26 +437,33 @@ $style_css
 
 				$('td:eq(2)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+floor+'</div>' );
 
+				//實際工程量
+				var actual_works_per_floor = "";
+				if (aData[19] != null && aData[19] != "0")
+					actual_works_per_floor = aData[19];
+
+				$('td:eq(3)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_works_per_floor+'</div>' );
+
 				//標準人力
 				var standard_manpower = "";
 				if (aData[5] != null )
 					standard_manpower = aData[5];
 
-				$('td:eq(3)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
+				$('td:eq(4)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+standard_manpower+'</div>' );
 
 				//可派人力
 				var available_manpower = "";
 				if (aData[6] != null )
 					available_manpower = aData[6];
 
-				$('td:eq(4)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+available_manpower+'</div>' );
+				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+available_manpower+'</div>' );
 
 				//實際出工人力
 				var actual_manpower = '<div id="actual_manpower'+aData[0]+'"></div>';
 				
 				xajax_returnValue(aData[0],aData[1],engineering_date,aData[18],floor,construction_days_per_floor,aData[12],aData[6],aData[5]);
 
-				$('td:eq(5)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_manpower+'</div>' );
+				$('td:eq(6)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 text-center" style="height:auto;min-height:32px;">'+actual_manpower+'</div>' );
 
 				// 差額
 				var manpower_gap = '<div id="manpower_gap'+aData[0]+'"></div>';
@@ -469,7 +476,7 @@ $style_css
 						colorClass = "black";
 					}
 
-					$('td:eq(6)', nRow).html(
+					$('td:eq(7)', nRow).html(
 						'<div class="d-flex justify-content-center align-items-center size12 ' + colorClass + ' weight text-center" style="height:auto;min-height:32px;">'
 						+ manpower_gap +
 						'</div>'
@@ -480,10 +487,10 @@ $style_css
 				if (aData[13] != null && aData[13] != "0")
 					manpower_type = aData[13];
 
-				$('td:eq(7)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 weight text-center" style="height:auto;min-height:32px;">'+manpower_type+'</div>' );
+				$('td:eq(8)', nRow).html( '<div class="d-flex justify-content-center align-items-center size12 weight text-center" style="height:auto;min-height:32px;">'+manpower_type+'</div>' );
 
 				//處理
-				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&auto_seq="+aData[0]+"&fm=$fm',800,520,'');";
+				var url1 = "openfancybox_edit('/index.php?ch=overview_manpower_sub_modify&building=$building&auto_seq="+aData[0]+"&fm=$fm',800,500,'');";
 				var mdel = "myDel(" + aData[0] + ", '$case_id', '$memberID');";
 
 				var show_btn = '';
@@ -506,7 +513,7 @@ $style_css
 					+'</div>';
 
 
-				$('td:eq(8)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+show_btn+'</div>' );
+				$('td:eq(9)', nRow).html( '<div class="d-flex justify-content-center align-items-center text-center" style="height:auto;min-height:32px;">'+show_btn+'</div>' );
 
 
 

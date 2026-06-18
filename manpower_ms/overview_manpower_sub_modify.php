@@ -81,7 +81,10 @@ function processform($aFormValues){
 	$engineering_date		= trim($aFormValues['engineering_date']);
 	$date_status 			= isset($aFormValues['date_status']) ? 'Y' : 'N';
 	$floor_list				= trim($aFormValues['floor_list']);
-	$actual_works_per_floor   = (int) $aFormValues['actual_works_per_floor'];
+	$actual_works_per_floor_input = trim($aFormValues['actual_works_per_floor']);
+	$actual_works_per_floor = is_numeric($actual_works_per_floor_input)
+		? round(max(0, (float) $actual_works_per_floor_input), 3)
+		: 0;
 	$standard_manpower   = (int) $aFormValues['standard_manpower'];
 	$available_manpower  = (int) $aFormValues['available_manpower'];
 	$actual_manpower     = (int) $aFormValues['actual_manpower'];
@@ -579,7 +582,7 @@ $style_css
 							<div class="col-lg-12 col-sm-12 col-md-12">
 								<div class="field_div1">實際工程量(M2):</div> 
 								<div class="field_div2">
-									<input type="text" class="form-control" id="actual_works_per_floor" name="actual_works_per_floor" size="50" style="width:100%;max-width:200px;" value="$actual_works_per_floor" onchange="setEdit();"/>
+									<input type="number" class="form-control" id="actual_works_per_floor" name="actual_works_per_floor" min="0" step="0.001" inputmode="decimal" size="50" style="width:100%;max-width:200px;" value="$actual_works_per_floor" onchange="setEdit();"/>
 								</div> 
 							</div> 
 						</div>
