@@ -99,6 +99,39 @@ function SaveValue($aFormValues){
 	return $objResponse;
 }
 
+$xajax->registerFunction("importCaseLayout");
+function importCaseLayout($case_id){
+
+	$objResponse = new xajaxResponse();
+
+	$mDB = "";
+	$mDB = new MywebDB();
+
+	$Qry="SELECT a.subcontractor_id5,b.subcontractor_name FROM CaseManagement a 
+		LEFT JOIN subcontractor b ON b.subcontractor_id = a.subcontractor_id5
+		WHERE a.case_id = '$case_id'";
+	$mDB->query($Qry);
+	if ($mDB->rowCount() > 0) {
+		$row=$mDB->fetchRow(2);
+		$layout = $row['subcontractor_id5'];
+		$layout_name = $row['subcontractor_name'];
+
+		if (!empty($layout)) {
+			$objResponse->assign("layout","value",$layout);
+			$objResponse->script("setEdit();");
+			$objResponse->script("art.dialog.tips('已代入放樣公司：".$layout_name."',1);");
+		} else {
+			$objResponse->script("jAlert('提示', '案件主檔尚未設定放樣公司', 'red', '', 2000);");
+		}
+	} else {
+		$objResponse->script("jAlert('提示', '查無案件主檔資料', 'red', '', 2000);");
+	}
+
+	$mDB->remove();
+
+	return $objResponse;
+}
+
 $xajax->processRequest();
 
 
@@ -123,6 +156,7 @@ $total = $mDB->rowCount();
 if ($total > 0) {
     //已找到符合資料
 	$row=$mDB->fetchRow(2);
+	$case_id = $row['case_id'];
 	$building = $row['building'];
 	$eng_description = $row['eng_description'];
 	$layout = $row['layout'];
@@ -182,6 +216,7 @@ $mDB->remove();
 $show_savebtn=<<<EOT
 <div class="btn-group vbottom" role="group" style="margin-top:5px;">
 	<button id="save" class="btn btn-primary" type="button" onclick="CheckValue(this.form);" style="padding: 5px 15px;"><i class="bi bi-check-circle"></i>&nbsp;存檔</button>
+	<button id="import_layout" class="btn btn-success" type="button" onclick="importCaseLayout();" style="padding: 5px 15px;"><i class="bi bi-arrow-repeat"></i>&nbsp;放樣代入</button>
 	<button id="cancel" class="btn btn-secondary display_none" type="button" onclick="setCancel();" style="padding: 5px 15px;"><i class="bi bi-x-circle"></i>&nbsp;取消</button>
 	<button id="close" class="btn btn-danger" type="button" onclick="parent.$.fancybox.close();" style="padding: 5px 15px;"><i class="bi bi-power"></i>&nbsp;關閉</button>
 </div>
@@ -475,6 +510,10 @@ function CheckValue(thisform) {
 function SaveValue(thisform) {
 	xajax_SaveValue(xajax.getFormValues('modifyForm'));
 	thisform.submit();
+}
+
+function importCaseLayout() {
+	xajax_importCaseLayout($('#modifyForm input[name=case_id]').val());
 }
 
 function setEdit() {

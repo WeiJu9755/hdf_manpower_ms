@@ -30,6 +30,17 @@ function dateDiffDays(string $date1, string $date2, bool $withSign = false): int
     return $diff->days;
 }
 
+function getSequentialFloor($baseFloor, $offset) {
+	$floorParts = explode(',', $baseFloor);
+	$firstFloor = trim($floorParts[0]);
+
+	if (preg_match('/^([^\d-]*)(-?\d+)(.*)$/u', $firstFloor, $matches)) {
+		return $matches[1].((int)$matches[2] + $offset).$matches[3];
+	}
+
+	return $firstFloor;
+}
+
 	$mDB = "";
 	$mDB = new MywebDB();
 
@@ -148,9 +159,11 @@ function processform($aFormValues){
 	if (isset($_GET['times'])){
 		for ($i = 1; $i < 5; $i++) {
 			 $target_seq = $auto_seq + $i;
+			 $target_floor = getSequentialFloor($floor_list, $i);
 			$Qry4="UPDATE overview_manpower_sub set
 			actual_works_per_floor  = '$actual_works_per_floor'
-			standard_manpower		= '$standard_manpower'
+			,floor 					= '$target_floor'
+			,standard_manpower		= '$standard_manpower'
 			,available_manpower		= '$available_manpower'
 			,actual_manpower		= '$actual_manpower'
 			,manpower_gap			= '$manpower_gap'
