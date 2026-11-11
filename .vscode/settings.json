@@ -1,0 +1,10 @@
+{
+    "intelephense.diagnostics.undefinedFunctions": false,
+    "intelephense.diagnostics.unusedSymbols": true,
+    "editor.showUnused": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.tabCompletion": "on",
+    "editor.acceptSuggestionOnEnter": "off",
+
+}
+

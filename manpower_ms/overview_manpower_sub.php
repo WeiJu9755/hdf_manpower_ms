@@ -201,9 +201,15 @@ $Confirm = getlang("確認");
 $Cancel = getlang("取消");
 
 //取得棟別及工程說明
-$overview_building_row = getkeyvalue2($site_db.'_info','overview_building',"auto_seq = '$seq2'",'building,eng_description');
+$overview_building_row = getkeyvalue2($site_db.'_info','overview_building',"auto_seq = '$seq2'",'case_id,building,eng_description');
+$case_id = $overview_building_row['case_id'] ?? $case_id;
 $building = $overview_building_row['building'];
 $eng_description = $overview_building_row['eng_description'];
+$case_row = getkeyvalue2($site_db.'_info','CaseManagement',"case_id = '$case_id'",'construction_id');
+$display_case_id = htmlspecialchars(trim((string)$case_id) ?: '未提供', ENT_QUOTES, 'UTF-8');
+$display_construction = htmlspecialchars(trim((string)($case_row['construction_id'] ?? '')) ?: '未提供', ENT_QUOTES, 'UTF-8');
+$display_building = htmlspecialchars(trim((string)$building) ?: '未提供', ENT_QUOTES, 'UTF-8');
+$display_eng_description = htmlspecialchars((string)$eng_description, ENT_QUOTES, 'UTF-8');
 
 
 $style_css=<<<EOT
@@ -243,10 +249,12 @@ EOT;
 
 $list_view=<<<EOT
 <div class="w-100 m-auto p-1 mb-5 bg-white">
-	<div style="position: relative;margin: 0 0 -30px 170px;">
-		<div class="inline size14 me-5">棟別：<span class="blue02 weight">$building</span></div>
-		<div class="inline size14">工程說明：<span class="blue02 weight">$eng_description</span></div>
+	<div class="alert alert-info mb-2" role="status" style="font-size:20px;line-height:1.8;">
+		<span class="me-3"><strong>案件編號：</strong>$display_case_id</span>
+		<span class="me-3"><strong>工程名稱：</strong>$display_construction</span>
+		<span class="me-3"><strong>棟別：</strong>$display_building</span>
 	</div>
+	<div class="mb-2" style="font-size:18px;">工程說明：<span class="blue02 weight">$display_eng_description</span></div>
 	<table class="table table-bordered border-dark w-100" id="overview_manpower_sub_table" style="min-width:1160px;">
 		<thead class="table-light border-dark">
 			<tr style="border-bottom: 1px solid #000;">
